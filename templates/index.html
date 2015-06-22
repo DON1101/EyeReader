@@ -1,0 +1,52 @@
+<html>
+    <title>test</title>
+
+    <link rel="stylesheet" href="/static/css/index.css" type="text/css" media="screen" />
+    <head></head>
+    <body>
+        <form id="form1" runat="server">
+            <input type='file' id="imgInp"/>
+            <div style="width:500px;height:250px;overflow: hidden;">
+                <img id="photo" src="#"/>
+            </div>
+        </form>
+
+        <script type="text/javascript" src="/static/js/jquery-2.1.4.min.js"></script>
+        <script type="text/javascript" src="/static/js/hammer.min.js"></script>
+        <script type="text/javascript">
+        function readURL(input) {
+
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+
+                reader.onload = function (e) {
+                    $('#photo').attr('src', e.target.result);
+                    
+                    var myElement = document.getElementById('photo');
+
+                    var mc = new Hammer.Manager(myElement);
+
+                    // create a pinch and rotate recognizer
+                    // these require 2 pointers
+                    var pinch = new Hammer.Pinch();
+                    var rotate = new Hammer.Rotate();
+
+                    // we want to detect both the same time
+                    pinch.recognizeWith(rotate);
+
+                    // add to the Manager
+                    mc.add([pinch, rotate]);
+                }
+
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        $("#imgInp").change(function(){
+            readURL(this);
+        });
+
+
+        </script>
+    </body>
+</html>
