@@ -1,12 +1,13 @@
 <html>
     <title>test</title>
-
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
     <link rel="stylesheet" href="/static/css/index.css" type="text/css" media="screen" />
     <head></head>
     <body>
         <form id="form1" runat="server">
             <input type='file' id="imgInp"/>
-            <div style="width:500px;height:250px;overflow: hidden;">
+            <div class="panel">Hello World</div>
+            <div id="box" style="width:500px;height:250px;overflow: hidden;background-color: blue;">
                 <img id="photo" src="#"/>
             </div>
         </form>
@@ -23,19 +24,34 @@
                     $('#photo').attr('src', e.target.result);
                     
                     var myElement = document.getElementById('photo');
+                    var $panel = $(".panel");
+                    var $photo = $('#photo');
+                    var $box = $("#box");
 
-                    var mc = new Hammer.Manager(myElement);
+                    var mc = new Hammer(myElement);
+                    var press = new Hammer.Press({time: 1});
+                    mc.add([press]);
+                    mc.get('pan').set({ direction: Hammer.DIRECTION_ALL });
 
-                    // create a pinch and rotate recognizer
-                    // these require 2 pointers
-                    var pinch = new Hammer.Pinch();
-                    var rotate = new Hammer.Rotate();
+                    var margin_left = 0;
+                    var margin_top = 0;
+                    mc.on("touchend", function(event){
+                        margin_left = parseFloat($photo.css("margin-left"));
+                        margin_top = parseFloat($photo.css("margin-top"));
+                        console.log(margin_left + ', ' + margin_top);
+                        console.log("pressup");
+                    });
 
-                    // we want to detect both the same time
-                    pinch.recognizeWith(rotate);
-
-                    // add to the Manager
-                    mc.add([pinch, rotate]);
+                    mc.on("panleft panright panup pandown", function(event) {
+                        console.log(event);
+                        pointer = event.pointers[0];
+                        $photo.css({"margin-left": (margin_left + event.deltaX) + "px",
+                                    "margin-top": (margin_top + event.deltaY) + "px"});
+                        $panel.html(pointer.layerX + ', ' + pointer.layerY + '<br>' +
+                                    event.deltaX + ', ' + event.deltaY + '<br>' +
+                                    pointer.offsetX + ', ' + pointer.offsetY + '<br>' +
+                                    pointer.clientX + ', ' + pointer.clientY + '<br>');
+                    });
                 }
 
                 reader.readAsDataURL(input.files[0]);
