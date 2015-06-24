@@ -6,10 +6,10 @@
     <body>
         <form id="form1" runat="server">
             <input type='file' id="imgInp"/>
-            <div class="panel">Hello World</div>
             <div id="box" style="width:500px;height:250px;overflow: hidden;background-color: blue;">
                 <img id="photo" src="#"/>
             </div>
+            <div class="panel">Hello World</div>
         </form>
 
         <script type="text/javascript" src="/static/js/jquery-2.1.4.min.js"></script>
@@ -30,20 +30,20 @@
 
                     var mc = new Hammer(myElement);
                     var press = new Hammer.Press({time: 1});
-                    mc.add([press]);
+                    var pinch = new Hammer.Pinch();
+                    var rotate = new Hammer.Rotate();
+                    pinch.recognizeWith(rotate);
+                    mc.add([press, pinch, rotate]);
                     mc.get('pan').set({ direction: Hammer.DIRECTION_ALL });
 
                     var margin_left = 0;
                     var margin_top = 0;
-                    mc.on("touchend", function(event){
+                    mc.on("press", function(event){
                         margin_left = parseFloat($photo.css("margin-left"));
                         margin_top = parseFloat($photo.css("margin-top"));
-                        console.log(margin_left + ', ' + margin_top);
-                        console.log("pressup");
                     });
 
                     mc.on("panleft panright panup pandown", function(event) {
-                        console.log(event);
                         pointer = event.pointers[0];
                         $photo.css({"margin-left": (margin_left + event.deltaX) + "px",
                                     "margin-top": (margin_top + event.deltaY) + "px"});
@@ -52,6 +52,33 @@
                                     pointer.offsetX + ', ' + pointer.offsetY + '<br>' +
                                     pointer.clientX + ', ' + pointer.clientY + '<br>');
                     });
+
+                    var origin_distance = 0;
+                    var image_width = parseFloat($photo.css("width"));
+                    mc.on("pinchstart", function(event) {
+                        pointer1 = event.pointers[0];
+                        pointer2 = event.pointers[1];
+                        origin_distance = Math.sqrt(
+                            Math.pow(pointer1.clientX - pointer2.clientX, 2) +
+                            Math.pow(pointer1.clientY - pointer2.clientY, 2)
+                        );
+                        image_width = parseFloat($photo.css("width"));
+                    });
+
+                    mc.on("pinch", function(event) {
+                        pointer1 = event.pointers[0];
+                        pointer2 = event.pointers[1];
+                        distance = Math.sqrt(
+                            Math.pow(pointer1.clientX - pointer2.clientX, 2) +
+                            Math.pow(pointer1.clientY - pointer2.clientY, 2)
+                        );
+                        multiple = distance / origin_distance;
+                        new_width = image_width * multiple;
+                        $photo.css({"width": new_width + "px"});
+                        $panel.html(origin_distance + "<br>" +
+                                    distance + "<br>" +
+                                    JSON.stringify(event));
+                    });
                 }
 
                 reader.readAsDataURL(input.files[0]);
@@ -59,6 +86,7 @@
         }
 
         $("#imgInp").change(function(){
+            console.log(this.files);
             readURL(this);
         });
 
