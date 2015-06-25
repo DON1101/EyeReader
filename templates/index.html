@@ -107,12 +107,19 @@
 
         function upload(zoom_multiple, rotate_angle) {
             canvas = document.getElementById('myCanvas');
-            context = canvas.getContext('2d');
-            context.clearRect(0, 0, 500, 250);
-            context.rotate(rotate_angle);
-            context.drawImage(imageObj, 0, 0, imageObj.width, imageObj.height, 0, 0, 500*2, 250*2);
-            context.rotate(-rotate_angle);
-            blob = Util.dataURLToBlob(canvas.toDataURL())
+            blob = Util.dataURLToBlob(canvas.toDataURL());
+            var fd = new FormData();
+            fd.append('fname', 'eyes.jpg');
+            fd.append('data', blob);
+            $.ajax({
+                type: 'POST',
+                url: '/',
+                data: fd,
+                processData: false,
+                contentType: false
+            }).done(function(data) {
+                console.log(data);
+            });
         }
 
         function transform(margin_left, margin_top) {
