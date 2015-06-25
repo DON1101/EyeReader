@@ -9,12 +9,22 @@
             <div id="box" style="width:500px;height:250px;overflow: hidden;background-color: blue;">
                 <img id="photo" src="#"/>
             </div>
+            
+            <input type="button" id="btn_upload" value="Upload"/>
+
+            <div>
+                <canvas id="myCanvas" width="500" height="250" style="border:1px solid #000000;">
+                </canvas>
+            </div>
             <div class="panel">Hello World</div>
         </form>
 
         <script type="text/javascript" src="/static/js/jquery-2.1.4.min.js"></script>
         <script type="text/javascript" src="/static/js/hammer.min.js"></script>
+        <script type="text/javascript" src="/static/js/filer.js"></script>
         <script type="text/javascript">
+        imageObj = new Image();
+
         function readURL(input) {
 
             if (input.files && input.files[0]) {
@@ -22,6 +32,7 @@
 
                 reader.onload = function (e) {
                     $('#photo').attr('src', e.target.result);
+                    imageObj.src = e.target.result;
                     
                     var myElement = document.getElementById('photo');
                     var $panel = $(".panel");
@@ -47,6 +58,7 @@
                         pointer = event.pointers[0];
                         $photo.css({"margin-left": (margin_left + event.deltaX) + "px",
                                     "margin-top": (margin_top + event.deltaY) + "px"});
+                        transform(margin_left + event.deltaX, margin_top + event.deltaY);
                         $panel.html(pointer.layerX + ', ' + pointer.layerY + '<br>' +
                                     event.deltaX + ', ' + event.deltaY + '<br>' +
                                     pointer.offsetX + ', ' + pointer.offsetY + '<br>' +
@@ -79,6 +91,10 @@
                                     distance + "<br>" +
                                     JSON.stringify(event));
                     });
+
+                    $("#btn_upload").click(function(event){
+                        upload(1, 0);
+                    });
                 }
 
                 reader.readAsDataURL(input.files[0]);
@@ -86,10 +102,29 @@
         }
 
         $("#imgInp").change(function(){
-            console.log(this.files);
             readURL(this);
         });
 
+        function upload(zoom_multiple, rotate_angle) {
+            canvas = document.getElementById('myCanvas');
+            context = canvas.getContext('2d');
+            context.clearRect(0, 0, 500, 250);
+            context.rotate(rotate_angle);
+            context.drawImage(imageObj, 0, 0, imageObj.width, imageObj.height, 0, 0, 500*2, 250*2);
+            context.rotate(-rotate_angle);
+            blob = Util.dataURLToBlob(canvas.toDataURL())
+        }
+
+        function transform(margin_left, margin_top) {
+            canvas = document.getElementById('myCanvas');
+            context = canvas.getContext('2d');
+            context.clearRect(0, 0, 500, 250);
+            context.drawImage(
+                imageObj,
+                0, 0, imageObj.width, imageObj.height,
+                margin_left, margin_top, imageObj.width, imageObj.height
+            );
+        }
 
         </script>
     </body>
