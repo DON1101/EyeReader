@@ -3,5 +3,8 @@
 *.a
 *.so
 
+# github.com folder
+github.com/*
+
 # Project related files
 main

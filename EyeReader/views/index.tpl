@@ -4,8 +4,8 @@
     <link rel="stylesheet" href="/static/css/index.css" type="text/css" media="screen" />
     <head></head>
     <body>
-        <form id="form1" runat="server">
-            <input type='file' id="imgInp"/>
+        <form id="form1">
+            <input type='file' id="imgInp" name="original"/>
             <div id="box" style="width:500px;height:250px;overflow: hidden;background-color: blue;">
                 <img id="photo" src="#"/>
             </div>
@@ -13,10 +13,10 @@
             <input type="button" id="btn_upload" value="Upload"/>
 
             <div>
-                <canvas id="myCanvas" width="500" height="250" style="border:1px solid #000000;">
+                <canvas id="myCanvas" width="500" height="250" style="display: None">
                 </canvas>
             </div>
-            <div class="panel">Hello World</div>
+            <div class="panel"></div>
         </form>
 
         <script type="text/javascript" src="/static/js/jquery-2.1.4.min.js"></script>
@@ -35,7 +35,6 @@
                     imageObj.src = e.target.result;
                     
                     var myElement = document.getElementById('photo');
-                    var $panel = $(".panel");
                     var $photo = $('#photo');
                     var $box = $("#box");
 
@@ -49,32 +48,40 @@
 
                     var margin_left = 0;
                     var margin_top = 0;
-                    mc.on("press", function(event){
+                    var image_width = parseFloat($photo.css("width"));
+                    var image_height = parseFloat($photo.css("height"));
+                    transform(margin_left, margin_top, image_width, image_height);
+
+                    function prepairPosition() {
                         margin_left = parseFloat($photo.css("margin-left"));
                         margin_top = parseFloat($photo.css("margin-top"));
+                        image_width = parseFloat($photo.css("width"));
+                        image_height = parseFloat($photo.css("height"));
+                    }
+
+                    mc.on("press", function(event){
+                        prepairPosition();
                     });
 
                     mc.on("panleft panright panup pandown", function(event) {
                         pointer = event.pointers[0];
                         $photo.css({"margin-left": (margin_left + event.deltaX) + "px",
                                     "margin-top": (margin_top + event.deltaY) + "px"});
-                        transform(margin_left + event.deltaX, margin_top + event.deltaY);
-                        $panel.html(pointer.layerX + ', ' + pointer.layerY + '<br>' +
-                                    event.deltaX + ', ' + event.deltaY + '<br>' +
-                                    pointer.offsetX + ', ' + pointer.offsetY + '<br>' +
-                                    pointer.clientX + ', ' + pointer.clientY + '<br>');
+                        transform(margin_left + event.deltaX,
+                                  margin_top + event.deltaY,
+                                  image_width,
+                                  image_height);
                     });
 
                     var origin_distance = 0;
-                    var image_width = parseFloat($photo.css("width"));
-                    mc.on("pinchstart", function(event) {
+                    mc.on("pinchstart pinchend", function(event) {
                         pointer1 = event.pointers[0];
                         pointer2 = event.pointers[1];
                         origin_distance = Math.sqrt(
                             Math.pow(pointer1.clientX - pointer2.clientX, 2) +
                             Math.pow(pointer1.clientY - pointer2.clientY, 2)
                         );
-                        image_width = parseFloat($photo.css("width"));
+                        prepairPosition();
                     });
 
                     mc.on("pinch", function(event) {
@@ -86,14 +93,13 @@
                         );
                         multiple = distance / origin_distance;
                         new_width = image_width * multiple;
+                        new_height = image_height * multiple;
                         $photo.css({"width": new_width + "px"});
-                        $panel.html(origin_distance + "<br>" +
-                                    distance + "<br>" +
-                                    JSON.stringify(event));
+                        transform(margin_left, margin_top, new_width, new_height);
                     });
 
-                    $("#btn_upload").click(function(event){
-                        upload(1, 0);
+                    $("#btn_upload").unbind().click(function(event){
+                        upload();
                     });
                 }
 
@@ -105,31 +111,35 @@
             readURL(this);
         });
 
-        function upload(zoom_multiple, rotate_angle) {
+        function upload() {
             canvas = document.getElementById('myCanvas');
             blob = Util.dataURLToBlob(canvas.toDataURL());
             var fd = new FormData();
             fd.append('fname', 'eyes.jpg');
-            fd.append('data', blob);
+            fd.append('original', blob);
             $.ajax({
                 type: 'POST',
                 url: '/',
                 data: fd,
+                enctype: 'multipart/form-data',
                 processData: false,
                 contentType: false
-            }).done(function(data) {
-                console.log(data);
+            }).success(function(data) {
+                $(".panel").html("Upload succeed.");
+            }).error(function(data) {
+                $(".panel").html("Upload failed.");
             });
+            $(".panel").html("Upload...");
         }
 
-        function transform(margin_left, margin_top) {
+        function transform(margin_left, margin_top, width, height) {
             canvas = document.getElementById('myCanvas');
             context = canvas.getContext('2d');
             context.clearRect(0, 0, 500, 250);
             context.drawImage(
                 imageObj,
                 0, 0, imageObj.width, imageObj.height,
-                margin_left, margin_top, imageObj.width, imageObj.height
+                margin_left, margin_top, width, height
             );
         }
 
