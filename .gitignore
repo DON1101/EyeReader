@@ -8,3 +8,5 @@ github.com/*
 
 # Project related files
 main
+EyeReader
+local_settings.go
