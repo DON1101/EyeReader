@@ -1,0 +1,7 @@
+package main
+
+var DB_NAME = "eyes_reader"
+var DB_USER = "deveteam"
+var DB_PASSWORD = ""
+var DB_HOST = "127.0.0.1"
+var DB_PORT = "5432"
