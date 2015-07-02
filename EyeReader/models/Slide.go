@@ -5,7 +5,7 @@ import (
 )
 
 type Slide struct {
-    Id int
+    Id int64
     Quiz *Quiz `orm:"rel(fk)"` // RelForeignKey relation
     EyesImage string
     Answer string

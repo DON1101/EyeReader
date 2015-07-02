@@ -1,23 +1,24 @@
 <html>
-    <title>test</title>
+    <title>Eyes Reader</title>
     <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
     <link rel="stylesheet" href="/static/css/index.css" type="text/css" media="screen" />
     <head></head>
     <body>
-        <form id="form1">
-            <input type='file' id="imgInp" name="original"/>
-            <div id="box" style="width:500px;height:250px;overflow: hidden;background-color: blue;">
-                <img id="photo" src="#"/>
-            </div>
-            
-            <input type="button" id="btn_upload" value="Upload"/>
+        <input type='file' id="input-image" name="original"/>
+        <div id="box" style="width:500px;height:250px;max-width:100%;overflow: hidden;background-color: blue;">
+            <img id="photo" src="#"/>
+        </div>
+        
+        <input type="hidden" id="user_id" value=""/>
+        <input type="hidden" id="quiz_id" value="">
+        <input type="text" id="slide_answer"/>
+        <input type="button" id="btn_upload" value="Upload"/>
 
-            <div>
-                <canvas id="myCanvas" width="500" height="250" style="display: None">
-                </canvas>
-            </div>
-            <div class="panel"></div>
-        </form>
+        <div>
+            <canvas id="myCanvas" width="500" height="250" style="display: None">
+            </canvas>
+        </div>
+        <div class="panel"></div>
 
         <script type="text/javascript" src="/static/js/jquery-2.1.4.min.js"></script>
         <script type="text/javascript" src="/static/js/hammer.min.js"></script>
@@ -107,25 +108,32 @@
             }
         }
 
-        $("#imgInp").change(function(){
+        $("#input-image").change(function(){
             readURL(this);
         });
 
         function upload() {
             canvas = document.getElementById('myCanvas');
+            slide_answer = $("#slide_answer").val();
+            user_id = $("#user_id").val();
+            quiz_id = $("#quiz_id").val();
             blob = Util.dataURLToBlob(canvas.toDataURL());
-            var fd = new FormData();
-            fd.append('fname', 'eyes.jpg');
-            fd.append('original', blob);
+            var form_data = new FormData();
+            form_data.append('slide_answer', slide_answer);
+            form_data.append('original', blob);
+            form_data.append('user_id', user_id);
+            form_data.append('quiz_id', quiz_id);
             $.ajax({
                 type: 'POST',
                 url: '/',
-                data: fd,
+                data: form_data,
                 enctype: 'multipart/form-data',
                 processData: false,
                 contentType: false
             }).success(function(data) {
                 $(".panel").html("Upload succeed.");
+                $("#user_id").val(data["UserId"]);
+                $("#quiz_id").val(data["QuizId"]);
             }).error(function(data) {
                 $(".panel").html("Upload failed.");
             });

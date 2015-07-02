@@ -6,7 +6,7 @@ import (
 
 // Model Struct
 type Quiz struct {
-    Id int
+    Id int64
     User *User `orm:"rel(fk)"` // RelForeignKey relation
 }
 
