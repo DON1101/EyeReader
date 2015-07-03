@@ -26,7 +26,11 @@ func init() {
 func main() {
     SyncDB()
 
+    // Serve eyes images through this url /media
+    beego.SetStaticPath("/media","media")
+
     beego.Router("/", &controllers.IndexController{})
+    beego.Router("/game/:quiz_id([0-9]+)", &controllers.GameController{})
     beego.Run()
 }
 

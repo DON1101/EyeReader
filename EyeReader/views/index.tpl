@@ -13,6 +13,7 @@
         <input type="hidden" id="quiz_id" value="">
         <input type="text" id="slide_answer"/>
         <input type="button" id="btn_upload" value="Upload"/>
+        <input type="button" id="btn_complete" value="Complete"/>
 
         <div>
             <canvas id="myCanvas" width="500" height="250" style="display: None">
@@ -66,8 +67,6 @@
 
                     mc.on("panleft panright panup pandown", function(event) {
                         pointer = event.pointers[0];
-                        $photo.css({"margin-left": (margin_left + event.deltaX) + "px",
-                                    "margin-top": (margin_top + event.deltaY) + "px"});
                         transform(margin_left + event.deltaX,
                                   margin_top + event.deltaY,
                                   image_width,
@@ -95,12 +94,14 @@
                         multiple = distance / origin_distance;
                         new_width = image_width * multiple;
                         new_height = image_height * multiple;
-                        $photo.css({"width": new_width + "px"});
                         transform(margin_left, margin_top, new_width, new_height);
                     });
 
                     $("#btn_upload").unbind().click(function(event){
-                        upload();
+                        upload("slide_create");
+                    });
+                    $("#btn_complete").unbind().click(function(event){
+                        upload("quiz_complete");
                     });
                 }
 
@@ -108,11 +109,15 @@
             }
         }
 
+        $("#input-image").click(function(){
+            this.value = null;
+        });
+
         $("#input-image").change(function(){
             readURL(this);
         });
 
-        function upload() {
+        function upload(action) {
             canvas = document.getElementById('myCanvas');
             slide_answer = $("#slide_answer").val();
             user_id = $("#user_id").val();
@@ -123,6 +128,7 @@
             form_data.append('original', blob);
             form_data.append('user_id', user_id);
             form_data.append('quiz_id', quiz_id);
+            form_data.append('action', action);
             $.ajax({
                 type: 'POST',
                 url: '/',
@@ -131,9 +137,15 @@
                 processData: false,
                 contentType: false
             }).success(function(data) {
-                $(".panel").html("Upload succeed.");
-                $("#user_id").val(data["UserId"]);
-                $("#quiz_id").val(data["QuizId"]);
+                action = data["Action"].toLowerCase();
+                if (action == "quiz_complete") {
+                    window.location.replace("/game/" + data["QuizId"]);
+                } else {
+                    $(".panel").html("Upload succeed.");
+                    $("#user_id").val(data["UserId"]);
+                    $("#quiz_id").val(data["QuizId"]);
+                    reset_canvas();
+                }
             }).error(function(data) {
                 $(".panel").html("Upload failed.");
             });
@@ -141,6 +153,13 @@
         }
 
         function transform(margin_left, margin_top, width, height) {
+            $('#photo').css(
+                {"margin-left": margin_left + "px",
+                 "margin-top": margin_top + "px",
+                 "width": width + "px",
+                 "height": height + "px"}
+            );
+
             canvas = document.getElementById('myCanvas');
             context = canvas.getContext('2d');
             context.clearRect(0, 0, 500, 250);
@@ -149,6 +168,25 @@
                 0, 0, imageObj.width, imageObj.height,
                 margin_left, margin_top, width, height
             );
+        }
+
+        function clear_canvas() {
+            $('#photo').attr('src', '');
+            canvas = document.getElementById('myCanvas');
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            transform(0, 0, 0, 0);
+        }
+
+        function reset_canvas() {
+            $('#photo').attr('src', '');
+            $('#photo').css(
+                {"margin-left": "",
+                 "margin-top": "",
+                 "width": "auto",
+                 "height":  "auto"}
+            );
+            canvas = document.getElementById('myCanvas');
+            context.clearRect(0, 0, canvas.width, canvas.height);
         }
 
         </script>

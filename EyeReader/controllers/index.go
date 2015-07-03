@@ -24,6 +24,7 @@ func (this *IndexController) Post() {
     str_user_id := this.GetString("user_id")
     str_quiz_id := this.GetString("quiz_id")
     slide_answer := this.GetString("slide_answer")
+    action := this.GetString("action")
     var user_id int64
     var quiz_id int64
     var user models.User
@@ -31,7 +32,7 @@ func (this *IndexController) Post() {
     var err error
 
     timestamp := lib.MakeTimestamp()
-    image_file := fmt.Sprintf("/tmp/eyes.%d", timestamp)
+    image_file := fmt.Sprintf("media/eyes.%d", timestamp)
     this.SaveToFile("original", image_file)
 
     /***************************************
@@ -88,7 +89,8 @@ func (this *IndexController) Post() {
     response_json := struct {
         UserId int64
         QuizId int64
-    } {user_id, quiz_id}
+        Action string
+    } {user_id, quiz_id, action}
     this.Data["json"] = &response_json
     this.ServeJson()
 }
