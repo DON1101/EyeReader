@@ -2,11 +2,26 @@
     <title>Eyes Reader</title>
     <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
     <link rel="stylesheet" href="/static/css/index.css" type="text/css" media="screen" />
+
+    <style type="text/css">
+    #box{
+        width:100%;
+        overflow: hidden;
+        background-color: blue;
+        display: inline-block;
+        position: relative;
+    }
+    #photo-wrapper{
+        padding-top: 50%;
+    }
+    </style>
     <head></head>
     <body>
         <input type='file' id="input-image" name="original"/>
-        <div id="box" style="width:500px;height:250px;max-width:100%;overflow: hidden;background-color: blue;">
-            <img id="photo" src="#"/>
+        <div id="box">
+            <div id="photo-wrapper">
+                <img id="photo" src="#"/>
+            </div>
         </div>
         
         <input type="hidden" id="user_id" value=""/>
