@@ -5,23 +5,17 @@
 
     <style type="text/css">
     #box{
-        width:100%;
+        width:500px;
+        max-width: 100%;
         overflow: hidden;
         background-color: blue;
-        display: inline-block;
-        position: relative;
-    }
-    #photo-wrapper{
-        padding-top: 50%;
     }
     </style>
     <head></head>
     <body>
         <input type='file' id="input-image" name="original"/>
         <div id="box">
-            <div id="photo-wrapper">
-                <img id="photo" src="#"/>
-            </div>
+            <img id="photo" src="#"/>
         </div>
         
         <input type="hidden" id="user_id" value=""/>
@@ -203,6 +197,10 @@
             canvas = document.getElementById('myCanvas');
             context.clearRect(0, 0, canvas.width, canvas.height);
         }
+
+        $(document).ready(function(e){
+            $("#box").css("height", $("#box").width()/2 + "px");
+        });
 
         </script>
     </body>
