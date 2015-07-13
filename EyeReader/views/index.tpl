@@ -25,7 +25,7 @@
         <input type="button" id="btn_complete" value="Complete"/>
 
         <div>
-            <canvas id="myCanvas" width="500" height="250" style="display: None">
+            <canvas id="myCanvas">
             </canvas>
         </div>
         <div class="panel"></div>
@@ -171,7 +171,7 @@
 
             canvas = document.getElementById('myCanvas');
             context = canvas.getContext('2d');
-            context.clearRect(0, 0, 500, 250);
+            context.clearRect(0, 0, canvas.width, canvas.height);
             context.drawImage(
                 imageObj,
                 0, 0, imageObj.width, imageObj.height,
@@ -182,6 +182,7 @@
         function clear_canvas() {
             $('#photo').attr('src', '');
             canvas = document.getElementById('myCanvas');
+            context = canvas.getContext('2d');
             context.clearRect(0, 0, canvas.width, canvas.height);
             transform(0, 0, 0, 0);
         }
@@ -200,6 +201,9 @@
 
         $(document).ready(function(e){
             $("#box").css("height", $("#box").width()/2 + "px");
+            canvas = document.getElementById('myCanvas');
+            canvas.width = $("#box").width();
+            canvas.height = $("#box").height();
         });
 
         </script>
