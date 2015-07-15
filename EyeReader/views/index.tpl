@@ -106,6 +106,33 @@
                         transform(margin_left, margin_top, new_width, new_height);
                     });
 
+                    var origin_vector = [0, 0];
+                    mc.on("rotatestart", function(event) {
+                        pointer1 = event.pointers[0];
+                        pointer2 = event.pointers[1];
+                        origin_vector = [pointer2.clientX - pointer1.clientX,
+                                         pointer2.clientY - pointer1.clientY];
+                    });
+
+                    mc.on("rotate", function(event) {
+                        pointer1 = event.pointers[0];
+                        pointer2 = event.pointers[1];
+                        vector = [pointer2.clientX - pointer1.clientX,
+                                  pointer2.clientY - pointer1.clientY];
+                        length = Math.sqrt(
+                            Math.pow(vector[0], 2) + Math.pow(vector[1], 2)
+                        );
+                        origin_length = Math.sqrt(
+                            Math.pow(origin_vector[0], 2) + Math.pow(origin_vector[1], 2)
+                        );
+                        cos = (vector[0]*origin_vector[0] + vector[1]*origin_vector[1])/(length*origin_length);
+
+                        $(".panel").html(
+                            "Pointer1: " + pointer1.clientX + ", " + pointer1.clientY + "<br>" +
+                            "Pointer2: " + pointer2.clientX + ", " + pointer2.clientY + "<br>" +
+                            "Rotation: " + Math.acos(cos));
+                    });
+
                     $("#btn_upload").unbind().click(function(event){
                         upload("slide_create");
                     });
