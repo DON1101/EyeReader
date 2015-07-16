@@ -61,7 +61,8 @@
                     var margin_top = 0;
                     var image_width = parseFloat($photo.css("width"));
                     var image_height = parseFloat($photo.css("height"));
-                    transform(margin_left, margin_top, image_width, image_height);
+                    var rotation = 0;
+                    transform(margin_left, margin_top, image_width, image_height, rotation);
 
                     function prepairPosition() {
                         margin_left = parseFloat($photo.css("margin-left"));
@@ -79,7 +80,8 @@
                         transform(margin_left + event.deltaX,
                                   margin_top + event.deltaY,
                                   image_width,
-                                  image_height);
+                                  image_height,
+                                  rotation);
                     });
 
                     var origin_distance = 0;
@@ -103,7 +105,7 @@
                         multiple = distance / origin_distance;
                         new_width = image_width * multiple;
                         new_height = image_height * multiple;
-                        transform(margin_left, margin_top, new_width, new_height);
+                        transform(margin_left, margin_top, new_width, new_height, rotation);
                     });
 
                     var origin_vector = [0, 0];
@@ -126,11 +128,14 @@
                             Math.pow(origin_vector[0], 2) + Math.pow(origin_vector[1], 2)
                         );
                         cos = (vector[0]*origin_vector[0] + vector[1]*origin_vector[1])/(length*origin_length);
+                        direction = vector[0]*origin_vector[1] - vector[1]*origin_vector[0] >0?-1:1;
+                        rotation = Math.acos(cos) * direction;
+                        transform(margin_left, margin_top, new_width, new_height, rotation);
 
                         $(".panel").html(
                             "Pointer1: " + pointer1.clientX + ", " + pointer1.clientY + "<br>" +
                             "Pointer2: " + pointer2.clientX + ", " + pointer2.clientY + "<br>" +
-                            "Rotation: " + Math.acos(cos));
+                            "Rotation: " + rotation);
                     });
 
                     $("#btn_upload").unbind().click(function(event){
@@ -188,22 +193,29 @@
             $(".panel").html("Upload...");
         }
 
-        function transform(margin_left, margin_top, width, height) {
+        function transform(margin_left, margin_top, width, height, rotation) {
+            angle = rotation * 180 / Math.PI;
             $('#photo').css(
                 {"margin-left": margin_left + "px",
                  "margin-top": margin_top + "px",
                  "width": width + "px",
-                 "height": height + "px"}
+                 "height": height + "px",
+                 "-ms-transform": "rotate(" + angle + "deg)",
+                 "-webkit-transform": "rotate(" + angle + "deg)",
+                 "transform": "rotate(" + angle + "deg)",
+                }
             );
 
             canvas = document.getElementById('myCanvas');
             context = canvas.getContext('2d');
             context.clearRect(0, 0, canvas.width, canvas.height);
+            context.rotate(rotation);
             context.drawImage(
                 imageObj,
                 0, 0, imageObj.width, imageObj.height,
                 margin_left, margin_top, width, height
             );
+            context.rotate(-rotation);
         }
 
         function clear_canvas() {
