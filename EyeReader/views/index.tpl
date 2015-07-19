@@ -62,7 +62,8 @@
                     var image_width = parseFloat($photo.css("width"));
                     var image_height = parseFloat($photo.css("height"));
                     var rotation = 0;
-                    transform(margin_left, margin_top, image_width, image_height, rotation);
+                    var cur_rotation = 0;
+                    transform(margin_left, margin_top, image_width, image_height, rotation + cur_rotation);
 
                     function prepairPosition() {
                         margin_left = parseFloat($photo.css("margin-left"));
@@ -81,7 +82,7 @@
                                   margin_top + event.deltaY,
                                   image_width,
                                   image_height,
-                                  rotation);
+                                  rotation + cur_rotation);
                     });
 
                     var origin_distance = 0;
@@ -105,7 +106,7 @@
                         multiple = distance / origin_distance;
                         new_width = image_width * multiple;
                         new_height = image_height * multiple;
-                        transform(margin_left, margin_top, new_width, new_height, rotation);
+                        transform(margin_left, margin_top, new_width, new_height, rotation + cur_rotation);
                     });
 
                     var origin_vector = [0, 0];
@@ -114,6 +115,9 @@
                         pointer2 = event.pointers[1];
                         origin_vector = [pointer2.clientX - pointer1.clientX,
                                          pointer2.clientY - pointer1.clientY];
+                    });
+                    mc.on("rotateend", function(event) {
+                        rotation += cur_rotation;
                     });
 
                     mc.on("rotate", function(event) {
@@ -129,8 +133,8 @@
                         );
                         cos = (vector[0]*origin_vector[0] + vector[1]*origin_vector[1])/(length*origin_length);
                         direction = vector[0]*origin_vector[1] - vector[1]*origin_vector[0] >0?-1:1;
-                        rotation = Math.acos(cos) * direction;
-                        transform(margin_left, margin_top, new_width, new_height, rotation);
+                        cur_rotation = Math.acos(cos) * direction;
+                        transform(margin_left, margin_top, new_width, new_height, rotation + cur_rotation);
 
                         $(".panel").html(
                             "Pointer1: " + pointer1.clientX + ", " + pointer1.clientY + "<br>" +
@@ -209,13 +213,18 @@
             canvas = document.getElementById('myCanvas');
             context = canvas.getContext('2d');
             context.clearRect(0, 0, canvas.width, canvas.height);
+            // Move registration point to the center of the canvas
+            context.translate(margin_left + width/2, margin_top + height/2);
             context.rotate(rotation);
+            context.translate(-margin_left - width/2, -margin_top - height/2);
             context.drawImage(
                 imageObj,
                 0, 0, imageObj.width, imageObj.height,
                 margin_left, margin_top, width, height
             );
+            context.translate(margin_left + width/2, margin_top + height/2);
             context.rotate(-rotation);
+            context.translate(-margin_left - width/2, -margin_top - height/2);
         }
 
         function clear_canvas() {
